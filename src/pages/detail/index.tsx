@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import styles from './detail.module.css'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 
 interface CoinProp {
     symbol: string;
@@ -15,6 +15,7 @@ interface CoinProp {
     formatedMarket: string;
     formatedLowprice: string;
     formatedHighprice: string;
+    numberDelta: number;
     error?: string;
 }
 
@@ -23,11 +24,17 @@ export function Detail() {
     const [detail, setDetail] = useState<CoinProp>()
     const [loading, setLoading] = useState(true);
 
+    const navigate = useNavigate();
+
     useEffect(() => {
         function getData() {
             fetch(`https://sujeitoprogramador.com/api-cripto/coin/?key=2e14b04842b2e11b&pref=BRL&symbol=${cripto}`)
                 .then(response => response.json())
                 .then((data: CoinProp) => {
+
+                    if (data.error) {
+                        navigate('/')
+                    }
 
                     const price = Intl.NumberFormat('pt-BR', {
                         style: 'currency',
@@ -39,7 +46,8 @@ export function Detail() {
                         formatedPrice: price.format(Number(data.price)),
                         formatedMarket: price.format(Number(data.market_cap)),
                         formatedLowprice: price.format(Number(data.low_24h)),
-                        formatedHighprice: price.format(Number(data.high_24h))
+                        formatedHighprice: price.format(Number(data.high_24h)),
+                        numberDelta: parseFloat(data.delta_24h.replace(",", "."))
                     }
 
 
@@ -50,7 +58,7 @@ export function Detail() {
         }
 
         getData();
-    }, [cripto])
+    }, [cripto, navigate])
 
     if (loading) {
         return (
@@ -68,6 +76,36 @@ export function Detail() {
             <p className={styles.center}>
                 {detail?.symbol}
             </p>
+            <section className={styles.content}>
+                <p>
+                    <strong>
+                        Preço:
+                    </strong> {detail?.formatedPrice}
+                </p>
+                <p>
+                    <strong>
+                        Maior preço 24:
+                    </strong> {detail?.formatedHighprice}
+                </p>
+                <p>
+                    <strong>
+                        Menor preço 24:
+                    </strong> {detail?.formatedLowprice}
+                </p>
+                <p>
+                    <strong>
+                        Delta 24h:
+                    </strong>
+                    <span className={detail?.numberDelta && detail?.numberDelta >= 0 ? styles.profit : styles.loss}>
+                        {detail?.delta_24h}
+                    </span>
+                </p>
+                <p>
+                    <strong>
+                        Valor mercado:
+                    </strong> {detail?.formatedMarket}
+                </p>
+            </section>
         </div>
     )
 }

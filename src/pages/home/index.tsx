@@ -15,7 +15,7 @@ interface CoinProps {
     market_cap: string;
     formatedPrice: string;
     formatedMarket: string;
-
+    numberDelta: number;
 }
 
 interface DataProps {
@@ -43,11 +43,13 @@ export function Home() {
                         const formated = {
                             ...item,
                             formatedPrice: price.format(Number(item.price)),
-                            formatedMarket: price.format(Number(item.market_cap))
+                            formatedMarket: price.format(Number(item.market_cap)),
+                            numberDelta: parseFloat(item.delta_24h.replace(",", "."))
                         }
 
                         return formated;
                     })
+
 
                     setCoins(formatResult);
                 })
@@ -59,12 +61,12 @@ export function Home() {
 
     }, [])
 
-function handleSearch(e: FormEvent){
-    e.preventDefault();
-    if(inputValue === "") return;
+    function handleSearch(e: FormEvent) {
+        e.preventDefault();
+        if (inputValue === "") return;
 
-    navigate(`/detail/${inputValue}`)
-}
+        navigate(`/detail/${inputValue}`)
+    }
 
 
     return (
@@ -73,7 +75,7 @@ function handleSearch(e: FormEvent){
                 <input
                     placeholder='Digite o simbolo da moeda: BTC...'
                     value={inputValue}
-                    onChange={ (e) => setInputValue(e.target.value)}
+                    onChange={(e) => setInputValue(e.target.value)}
                 />
                 <button type='submit'>
                     <BiSearch size={30} color="#FFF" />
@@ -104,7 +106,7 @@ function handleSearch(e: FormEvent){
                             <td className={styles.tdLabel} data-label="Preço">
                                 {coin.formatedPrice}
                             </td>
-                            <td className={Number(coin?.delta_24h) >= 0 ? styles.tdProfit : styles.tdLoss} data-label="Volume">
+                            <td className={coin.numberDelta >= 0 ? styles.tdProfit : styles.tdLoss} data-label="Volume">
                                 <span>{coin.delta_24h}</span>
                             </td>
 
